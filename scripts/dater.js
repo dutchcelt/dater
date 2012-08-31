@@ -89,11 +89,11 @@
                                         $(this).detach();
                                     });
                                     rendered = false;
-                                    if($elem.val()!=="") {
+                                    if($elem.val()!=="" &&  Date.parse($elem.val())!==null) {
                                         options.thisDate = Date.parse($elem.val());
                                         setDate = Date.parse($elem.val());
                                     }
-                                 },
+                                  },
                     monthIndex  = Date.getMonthNumberFromName(options.thisDate.toString('MMMM')),
                     timer,
                     rendered    = false;
@@ -197,12 +197,17 @@
                 //  Pointer device (re)enters the datepicker: Prevent detaching the datepicker
                 $template.on('mouseover',function(e){
                     clearTimeout(timer);
-                    
                 });
                 //  Input element is focus, show the datepicker
                 $elem.on('focus.dater',function(e){
-                    $(this).trigger('render.dater');
-                    clearTimeout(timer);
+                    if(Date.parse($(this).val())===null){
+                        $(this).val("");
+                        options.thisDate = Date.today();
+                    }
+                    if($(this).val()==="" || Date.parse($(this).val())!==null){
+                        $(this).trigger('render.dater');
+                        clearTimeout(timer);
+                    }
                 });
                 //  Render the detepicker
                 $elem.on('render.dater',function(e){
@@ -214,7 +219,7 @@
                     }
                 });
                 //  Set the input value
-                $elem.on('change',function(e){
+                $elem.on('change',function(e){  
                     options.thisDate = Date.parse($(this).val());
                 });
                 //  Hide the datepicker
