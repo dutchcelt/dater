@@ -1,6 +1,7 @@
 /*! ###########################################################################
     
-    Source: https://github.com/dutchcelt/dater
+    Source:     https://github.com/dutchcelt/dater
+    Version:    1.0
     
     Copyright (C) 2011 - 2012,  Lunatech Labs B.V., C. Egor Kloos. All rights reserved.
     GNU General Public License, version 3 (GPL-3.0)
@@ -26,12 +27,19 @@
     *   date.js (tested with Version: 1.0 Alpha-1)
     *   
     *   Script:
-    *   $("input").dater();
+    *   $(document).ready(function(){
+    *     $("input").dater();
+    *   });
     *   
     *   Markup:
     *   <input type="text" id='test' />
     *   <input type="text" placeholder="day-month-year" />
     *   <input type="text" value="29-03-2014" />
+    *   
+    *   Options:
+    *   $("input").dater({format:"MM.dd.yy"}); // alternative date formats
+    *   $("input").dater({placeholder:"day-month-year"}); // set or override the placeholder attribute
+    *   
     *   
     
     ########################################################################### */
