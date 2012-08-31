@@ -25,3 +25,5 @@ Alternative date formats
 Set or override the placeholder attribute  
 `$("input").dater({placeholder:"day-month-year"});` 
 
+Set the CSS z-index property  
+`$("input").dater({zIndex:"42"});`

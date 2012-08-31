@@ -39,6 +39,7 @@
     *   Options:
     *   $("input").dater({format:"MM.dd.yy"}); // alternative date formats
     *   $("input").dater({placeholder:"day-month-year"}); // set or override the placeholder attribute
+    *   $("input").dater({zIndex:"42"}); // set the CSS z-index property
     *   
     *   
     
@@ -69,7 +70,8 @@
                                     format: "dd-MM-yyyy",
                                     placeholder: "",
                                     startDateID: "",
-                                    endDateID: ""
+                                    endDateID: "",
+                                    zIndex: "424242"
                                   },
                     options     = $.extend(defaults, settings);
                 
@@ -220,6 +222,7 @@
                 });
                 //  Set the input value
                 $elem.on('change',function(e){  
+                    $(this).val(dateStr(options.thisDate,options.format));
                     options.thisDate = Date.parse($(this).val());
                 });
                 //  Hide the datepicker
