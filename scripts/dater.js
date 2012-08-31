@@ -167,28 +167,24 @@
                 //  EVENTS
                 //  User clicks 'Today' and is done
                 $template.on('click','.dater-today',function(e){
-                    e.preventDefault();
                     $elem.val(dateStr(options.today,options.format));
                     highlightDate(options.today);
                     fadeOut($(e.delegateTarget));
                 });
                 //  User clicks on a day and is done
                 $template.on('click','[data-day]',function(e){
-                    e.preventDefault();
                     options.thisDate.set({day:Number($(this).text())});
                     updatePicker($(this));
                     fadeOut($(e.delegateTarget));
                 });
                 //  User clicks on a month and can continue
                 $template.on('click','[data-month]',function(e){
-                    e.preventDefault();
                     options.thisDate.set({month:Date.getMonthNumberFromName($(this).text())});
                     render($template);
                     $elem.focus();
                 });
                 //  User sets year and can continue 
                 $template.on('click','header a',function(e){
-                    e.preventDefault();
                     if($(this).is('.dater-year-next')){
                         options.thisDate.addYears(1);
                     } else {
@@ -198,24 +194,18 @@
                     render($template);
                     $elem.focus();
                 });
-                //  Pointer device leaves the datepicker: Wait and then detach the datepicker
-                $template.on('mouseout',function(e){
-                    e.preventDefault();
-                    timer = setTimeout(fadeOut,800);
-                });
                 //  Pointer device (re)enters the datepicker: Prevent detaching the datepicker
                 $template.on('mouseover',function(e){
-                    e.preventDefault();
                     clearTimeout(timer);
                     
                 });
                 //  Input element is focus, show the datepicker
                 $elem.on('focus.dater',function(e){
                     $(this).trigger('render.dater');
+                    clearTimeout(timer);
                 });
                 //  Render the detepicker
                 $elem.on('render.dater',function(e){
-                    e.preventDefault();
                     if($("#daterWidget"+index).is(":visible")===false){
                         render($template, function(){
                             $template.fadeIn('fast');
@@ -228,8 +218,8 @@
                     options.thisDate = Date.parse($(this).val());
                 });
                 //  Hide the datepicker
-                $elem.on('mouseout',function(e){
-                    timer=setTimeout(fadeOut, 800);
+                $elem.on('blur',function(e){
+                    timer=setTimeout(fadeOut, 200);
                 });
                 
             });
