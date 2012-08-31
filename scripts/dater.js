@@ -1,4 +1,4 @@
-/*  ###########################################################################
+/*! ###########################################################################
     
     Source: https://github.com/dutchcelt/dater
     
@@ -17,6 +17,22 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.opensource.org/licenses/gpl-3.0.html
+    
+    
+    *   USAGE:
+    *   
+    *   Requirements:
+    *   jQuery (tested with 1.8)
+    *   date.js (tested with Version: 1.0 Alpha-1)
+    *   
+    *   Script:
+    *   $("input").dater();
+    *   
+    *   Markup:
+    *   <input type="text" id='test' />
+    *   <input type="text" placeholder="day-month-year" />
+    *   <input type="text" value="29-03-2014" />
+    *   
     
     ########################################################################### */
 
@@ -65,7 +81,7 @@
                                         $(this).detach();
                                     });
                                     rendered = false;
-                                    if($elem.val()!="") {
+                                    if($elem.val()!=="") {
                                         options.thisDate = Date.parse($elem.val());
                                         setDate = Date.parse($elem.val());
                                     }
@@ -78,7 +94,7 @@
                     $elem.val(dateStr(options.thisDate,options.format));
                     elem.addClass('active');
                     highlightDate(options.thisDate);
-                }
+                };
                 
                 var render = function($instance,f){
                 
@@ -86,8 +102,8 @@
                     $(".dater-widget:not('#daterWidget"+index+"')").detach();
                     var calMonths   = "",
                         calDays     = "";
-                    //  Creat a list of the Abbriviated month names
-                    for (n in Date.CultureInfo.abbreviatedMonthNames) {
+                    //  Create a list of the Abbriviated month names
+                    for (n=0, l = Date.CultureInfo.abbreviatedMonthNames.length; n<l; n++) {
                         calMonths += '<a data-month="'+n+'">'+Date.CultureInfo.abbreviatedMonthNames[n]+'</a>';
                     }
                     //  Figure out what day it is
@@ -95,10 +111,10 @@
                         var date = (day < 10 ? '0' : '') + day + dateStr(options.thisDate,".MMM.yyyy");
                         var dayNum = Date.getDayNumberFromName(Date.parse(date).toString("ddd"));
                         return dayNum;
-                    }
-                    //  Ceate a list of days of the week starting with Monday
+                    };
+                    //  Create a list of days of the week starting with Monday
                     for (n = 0, l = Date.CultureInfo.firstLetterDayNames.length; n < l; n++) {
-                        calDays += '<span>'+Date.CultureInfo.firstLetterDayNames[((n==6)?0:n+1)]+'</span>';
+                        calDays += '<span>'+Date.CultureInfo.firstLetterDayNames[((n===6)?0:n+1)]+'</span>';
                     }
                     //  Create all the days of the month
                     for (x=0,l=Date.getDaysInMonth(dateIndex(options.thisDate,'yyyy')+1,dateIndex(options.thisDate,'MM')); x<l; x++) {
@@ -106,7 +122,7 @@
                     }
                     //  Add the Year to the template
                     $('header span',$template).html(dateStr(options.thisDate,"yyyy"));
-                    //  Add all the calnendar days to the template
+                    //  Add all the calendar days to the template
                     $('section',$instance).html(calDays);
                     //  Add the Months to the template
                     $('aside',$instance).html(calMonths);
@@ -119,26 +135,24 @@
                     highlightDate(options.thisDate);
                     setPos($instance);
                     //  Callback
-                    if (typeof f == "function") { f(); }
-                }
+                    if (typeof f === "function") { f(); }
+                };
                 
                 var highlightDate = function(date){
                     $('[data-day],[data-month]',$template).removeClass('active');
-                    console.log(dateStr(date,"MM.yyyy") === dateStr(setDate,"MM.yyyy"))
                     if(dateStr(date,"MM.yyyy") === dateStr(setDate,"MM.yyyy")) {
                         $('[data-day]',$template).eq(dateIndex(date,"dd")).addClass('active');
                     }
                     $('[data-month]',$template).eq(dateIndex(date,"MM")).addClass('active');
                     $('header span',$template).html(dateStr(options.thisDate,"yyyy"));
                     clearTimeout(timer); // Prevent the datepicker from detaching
-                    }
+                    };
                 var setPos = function($instance){
                     var offset = $elem.offset();
                     var bottom = ($instance.outerHeight()+(offset.top + $elem.outerHeight()) > $('body').outerHeight() );
-                    //  console.log(bottom)
                     $instance.css({position: 'absolute', zIndex: '4242', top: offset.top + $elem.outerHeight(), left: offset.left });
-                }
-                if (typeof $elem.attr("placeholder") != 'string'){
+                };
+                if (typeof $elem.attr("placeholder") !== 'string'){
                     $elem.attr("placeholder",((options.placeholder==="") ? options.format.toLowerCase() : options.placeholder) );
                 }
                 
@@ -194,7 +208,7 @@
                 //  Render the detepicker
                 $elem.on('render.dater',function(e){
                     e.preventDefault();
-                    if($("#daterWidget"+index).is(":visible")==false){
+                    if($("#daterWidget"+index).is(":visible")===false){
                         render($template, function(){
                             $template.fadeIn('fast');
                             rendered = true;
