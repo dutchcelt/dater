@@ -27,3 +27,6 @@ Set or override the placeholder attribute
 
 Set the CSS z-index property  
 `$("input").dater({zIndex:"42"});`
+
+
+**Note**: This script (Dater) relies on date.js and therefore allows you to enter language based dates. Type in words like 'today' or 'tomorrow' or expressions like 'next week' and 'Dater' will use date.js to convert it to its numeric equivalent. 
