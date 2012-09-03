@@ -123,10 +123,23 @@
                                     for (n = 0, l = Date.CultureInfo.firstLetterDayNames.length; n < l; n++) {
                                         calDays += '<span>'+Date.CultureInfo.firstLetterDayNames[((n===6)?0:n+1)]+'</span>';
                                     }
+
+                                    // Add days of previous month for the first week of the month
+                                    var firstDayOfMonth = new Date(options.thisDate.valueOf()).moveToFirstDayOfMonth();
+                                    var firstDayOfWeek = firstDayOfMonth.add({
+                                        days: 0 - firstDayOfMonth.getDay()
+                                    });
+
+                                    for (x=firstDayOfWeek.getDate(),l=Date.getDaysInMonth(firstDayOfWeek.getYear(),firstDayOfWeek.getMonth()); x<l; x++) {
+                                        calDays += '<a class="prev-month" data-day="'+getDay(x+1)+'">'+(x+1)+'</a>';
+                                    }
+
                                     //  Create all the days of the month
                                     for (x=0,l=Date.getDaysInMonth(dateIndex(options.thisDate,'yyyy')+1,dateIndex(options.thisDate,'MM')); x<l; x++) {
                                         calDays += '<a data-day="'+getDay(x+1)+'">'+(x+1)+'</a>';
                                     }
+
+                                    if(new Date(options.thisDate.valueOf()).moveToFirst)
                                     //  Add the Year to the template
                                     $('header span',$instance).html(dateStr(options.thisDate,"yyyy"));
                                     //  Add all the calendar days to the template
@@ -138,7 +151,9 @@
                                     //  Hide the template
                                     if(!rendered){ $instance.hide(); }
                                     //  Set the first day of the month (using CSS to set its position)
-                                    $('section a:first').addClass('first');
+                                    var firstOffset = Date.getDaysInMonth(firstDayOfWeek.getYear(),firstDayOfWeek.getMonth()) - firstDayOfWeek.getDate();
+
+                                    $('section a').eq(firstOffset).addClass('first');
                                     show(options.thisDate);
                                     setPos($instance);
                                     //  Callback
@@ -153,7 +168,7 @@
                     show        = function(date){
                                     $('[data-day],[data-month]',$template).removeClass('active');
                                     if(dateStr(date,"MM.yyyy") === dateStr(setDate,"MM.yyyy")) {
-                                        $('[data-day]',$template).eq(dateIndex(date,"dd")).addClass('active');
+                                        $('.first[data-day], .first[data-day] ~ [data-day]',$template).eq(dateIndex(date,"dd")).addClass('active');
                                     }
                                     $('[data-month]',$template).eq(dateIndex(date,"MM")).addClass('active');
                                     $('header span',$template).html(dateStr(options.thisDate,"yyyy"));
