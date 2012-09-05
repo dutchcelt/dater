@@ -53,7 +53,12 @@
         line-height: 2;
         cursor: pointer;
         box-shadow: inset -1px -1px 0 0 rgba(0,0,0,0.05), inset 1px 1px 0 0 rgba(255,255,255,0.5);
+
+        &.prev-month {
+            color: rgba(66,66,66,0.5);
+        }
     }
+
     .dater-widget a[data-day='6'],
     .dater-widget a[data-day='0'] {
         background-color: rgba(0,0,0,0.03);
@@ -73,14 +78,6 @@
         color: #bbb;
         background: #666;
     }
-    
-    a[data-day='1'].first{ margin-left: 0em; }
-    a[data-day='2'].first{ margin-left: 2em; }
-    a[data-day='3'].first{ margin-left: 4em; }
-    a[data-day='4'].first{ margin-left: 6em; }
-    a[data-day='5'].first{ margin-left: 8em; }
-    a[data-day='6'].first{ margin-left: 10em; }
-    a[data-day='0'].first{ margin-left: 12em; }
     
     .dater-widget header {
         color: #f7f7f7;
