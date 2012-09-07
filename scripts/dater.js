@@ -1,7 +1,7 @@
 /*! ###########################################################################
     
     Source:     https://github.com/dutchcelt/dater
-    Version:    1.0
+    Version:    1.1
     
     Copyright (C) 2011 - 2012,  Lunatech Labs B.V., C. Egor Kloos. All rights reserved.
     GNU General Public License, version 3 (GPL-3.0)
@@ -74,8 +74,7 @@
                                     zIndex: "424242"
                                   },
                     options     = $.extend(defaults, settings),
-                    $val        = (Date.parse($elem.val())===null) ? Date.today().toString(options.format) : Date.parse($elem.val()).toString(options.format),
-                    $date       = Date.parseExact($val,options.format),
+                    $date       = (Date.parse($elem.val())===null) ? Date.today() : Date.parse($elem.val()),
                     $data       = $.data($elem,'dater',{day: $date.getDate(),month: $date.getMonth(), year: $date.getFullYear()}),
                     checkDate   = $date.toString(options.format),
                     timer,
@@ -100,38 +99,41 @@
                                         $(this).detach();
                                     });
                                     rendered = false;
-                                    if($val!=="" &&  Date.parseExact($val,options.format)!==null) {
-                                        checkDate = $val;
+                                    if($elem.val()!=="" &&  Date.parse($elem.val())!==null) {
+                                        checkDate = $elem.val();
                                     }
                                   },
                     render      = function($instance,f){
                                     
-                                    //var renderDate = new Date.parseExact($val,options.format);
+                                    var newdate = new Date($data.year,$data.month,$data.day);
                                     
                                     //  Clear all other datepickers, except this one
                                     $(".dater-widget:not('#daterWidget"+index+"')").detach();
                                     var calMonths   = "",
                                         calDays     = "",
                                         calDates    = "",
+                                        firstWeekOffset,
+                                        remainderOfLastMonth="",
+                                        lastWeekOffset,
+                                        startOfNextMonth="",
                                         daysLength  = Date.getDaysInMonth($data.year,$data.month);
                                         
                                     //  Create a list of the Abbriviated month names
                                     for (n=0, l = Date.CultureInfo.abbreviatedMonthNames.length; n<l; n++) {
                                         calMonths += '<a data-month="'+n+'">'+Date.CultureInfo.abbreviatedMonthNames[n]+'</a>';
                                     }
+                                    
                                     //  Figure out what day it is
                                     var getDayIndex = function(d){
                                         var date = new Date();
                                         var dayOfTheMonth = date.set({day: d, month: $data.month, year: $data.year });
                                         return Date.getDayNumberFromName(dayOfTheMonth.toString('ddd'));
                                     };
+                                    
                                     //  Create a list of days of the week starting with Monday
                                     for (n = 0, l = Date.CultureInfo.firstLetterDayNames.length; n < l; n++) {
                                         calDays += '<span>'+Date.CultureInfo.firstLetterDayNames[((n===6)?0:n+1)]+'</span>';
                                     }
-
-
-                                    var firstWeekOffset,remainderOfLastMonth="",lastWeekOffset,startOfNextMonth="";
 
                                     //  Create all the days of the month
                                     for (x=0,l=daysLength; x<l; x++) {
@@ -140,25 +142,22 @@
                                         }
                                         calDates += '<a data-day="'+getDayIndex(x+1)+'">'+(x+1)+'</a>';
                                     }
-                                    var newdate = new Date($data.year,$data.month,$data.day);
+                                    
+                                    //  Fill the empty calendar spaces with the overflow to the next and previous months
                                     newdate.add({month: -1});
-
                                     var days = newdate.getDaysInMonth();
                                     var offset = newdate.getDaysInMonth() - firstWeekOffset ;
-                                    
                                     for (x=offset,l=days; x<l; x++) {
                                         remainderOfLastMonth += '<i class="offset">'+(x+1)+'</i>';
                                     }
                                     for (x=0,l=((Math.ceil((daysLength + firstWeekOffset) /7))*7)-(daysLength + firstWeekOffset); x<l; x++) {
                                         startOfNextMonth += '<i class="offset">'+(x+1)+'</i>';
                                     }
-                                    calDates = remainderOfLastMonth + calDates + startOfNextMonth;
-
 
                                     //  Add the Year to the template
                                     $('header span',$instance).html($data.year);
                                     //  Add all the calendar days to the template
-                                    $('section',$instance).html(calDays + calDates);
+                                    $('section',$instance).html(calDays + remainderOfLastMonth + calDates + startOfNextMonth);
                                     //  Add the Months to the template
                                     $('aside',$instance).html(calMonths);
                                     //  Add the template to the the body
@@ -168,15 +167,14 @@
                                         $instance.hide(); 
                                         setPos($instance);
                                     }
-
-                                    
                                     show();
                                     setPos($instance);
                                     //  Callback
                                     if (typeof f === "function") { f(); }
                                   },
                     update      = function(elem){
-                                    $elem.val($val);
+                                    var date = new Date($data.year,$data.month,$data.day);
+                                    $elem.val(date.toString(options.format));
                                     if (elem) { elem.addClass('active'); }
                                     show();
                                   },
@@ -201,9 +199,9 @@
                     $elem.attr("placeholder",((options.placeholder==="") ? options.format.toLowerCase() : options.placeholder) );
                 }
                 
-                //  if by any chance a preset date is not in a numerical format then convert it.
+                //  if by any chance a preset date doesn't have a numerical format then convert it.
                 if($elem.val()!==""){
-                    $elem.val(Date.parse($val).toString(options.format));
+                    $elem.val($date.toString(options.format));
                 }
 
 
@@ -211,24 +209,26 @@
 
                 //  User clicks 'Today' and is done
                 $template.on('click','.dater-today',function(e){
-                    $val = updateVal('today'); 
-                    $elem.val($val);
+                    setData(Date.today());
+                    $elem.val(Date.today().toString(options.format));
                     show();
                     fadeOut();
                 });
+                
                 //  User clicks on a day and is done
                 $template.on('click','[data-day]',function(e){
                     $data.day = parseInt($(e.target).html(),10);
-                    $val = updateVal();
                     update($(e.target));
                     fadeOut();
                 });
+                
                 //  User clicks on a month and can continue
                 $template.on('click','[data-month]',function(e){
                     $data.month = $(this).data('month');
                     render($template);
                     $elem.focus();
                 });
+                
                 //  User sets year and can continue 
                 $template.on('click','header a',function(e){
                     if($(this).is('.dater-year-next')){
@@ -240,56 +240,52 @@
                     render($template);
                     $elem.focus();
                 });
+                
                 //  Pointer device (re)enters the datepicker: Prevent detaching the datepicker
-                $template.on('mouseover click',function(e){
-                    $elem.trigger('focus.dater');
+                $template.on('click','.offset, span, header, footer, aside',function(e){
+                    clearTimeout(timer);
+                    $elem.focus();
                 });
+                
                 //  Input element is focus, show the datepicker
-                $elem.on('focus.dater',function(e){
-
-                    //$val = $(this).val();
-                    if(e.namespace!=="dater") { 
-                        var date = (Date.parseExact($val,options.format)) ? Date.parseExact($val,options.format) : Date.today();
-                        if(date===null && !rendered){
-                            //date = Date.today();
-                        }
-                        if(($val==="" || date!==null)){
-                            $(this).trigger('render.dater');
-                        }
+                $elem.on('focus',function(e){
+                    var date = Date.parseExact($(this).val(),options.format);
+                    if(date===null && !rendered){
+                        setData(Date.today());
+                    }
+                    if(($(this).val()==="" || date!==null)){
+                        $(this).trigger('render.dater');
                     }
                     clearTimeout(timer);
                 });
+                
                 //  Render the detepicker
                 $elem.on('render.dater',function(e){
                     if($("#daterWidget"+index).is(":visible")===false){
                         render($template, function(){
-                            if($val===""){
-                                $val = Date.today().toString(options.format);
-                            }
-                            $val = updateVal();                            
                             $template.fadeIn('fast');
                             rendered = true;
                         });
                     }
                 });
+                
                 //  Set the input value
                 $elem.on('change',function(e){  
-                    var val = $(this).val();
-                    var date = Date.parse(val);
+                    var date = Date.parse($(this).val());
                     if(date===null){
                         $(this).val("");
-                        date = Date.today();
-                        setData(date);
+                        setData(Date.today());
                     }
                     if(date!==null){
                         setData(date, function(){
                             var newdate = new Date().set($data);
                             $elem.val(newdate.toString(options.format));
-                            $elem.trigger('blur');
                             update();
+                            $elem.trigger('blur');
                         });
                     }
                 });
+                
                 //  Hide the datepicker
                 $elem.on('blur',function(e){
                     timer=setTimeout(fadeOut, 200);
