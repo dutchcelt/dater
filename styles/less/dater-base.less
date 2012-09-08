@@ -45,8 +45,7 @@
         width: 15.4em;
         overflow: hidden;
     }
-    .dater-widget a[data-day],
-    .dater-widget .offset {
+    .dater-item {
         display: inline-block;
         width: 2em;
         height: 2em;
@@ -59,11 +58,17 @@
         font-style: normal;
         color: #ccc;
     }
+/*
     .dater-widget a[data-day='6'],
-    .dater-widget a[data-day='0'] {
+    .dater-widget a[data-day='5'] {
         background-color: rgba(0,0,0,0.03);
     }
-    .dater-widget a[data-day]:hover{
+*/
+    .dater-widget .dater-item:nth-child(7n+6),
+    .dater-widget .dater-item:nth-child(7n+7) {
+        background-color: rgba(0,0,0,0.03);
+    }
+    .dater-widget a.dater.day:hover{
         color: white;
         background: #666;
         box-shadow: 0 0 0 transparent;
@@ -78,15 +83,7 @@
         color: #bbb;
         background: #666;
     }
-     
-    a[data-day='1'].first{ margin-left: 0em; }
-    a[data-day='2'].first{ margin-left: 2em; }
-    a[data-day='3'].first{ margin-left: 4em; }
-    a[data-day='4'].first{ margin-left: 6em; }
-    a[data-day='5'].first{ margin-left: 8em; }
-    a[data-day='6'].first{ margin-left: 10em; }
-    a[data-day='0'].first{ margin-left: 12em; }
-     
+          
     .dater-widget header {
         color: #f7f7f7;
         background: #666;

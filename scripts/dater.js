@@ -1,7 +1,7 @@
 /*! ###########################################################################
     
     Source:     https://github.com/dutchcelt/dater
-    Version:    1.1
+    Version:    1.2
     
     Copyright (C) 2011 - 2012,  Lunatech Labs B.V., C. Egor Kloos. All rights reserved.
     GNU General Public License, version 3 (GPL-3.0)
@@ -106,29 +106,20 @@
                     render      = function($instance,f){
                                     
                                     var newdate = new Date($data.year,$data.month,$data.day);
-                                    
+
                                     //  Clear all other datepickers, except this one
                                     $(".dater-widget:not('#daterWidget"+index+"')").detach();
                                     var calMonths   = "",
                                         calDays     = "",
                                         calDates    = "",
-                                        firstWeekOffset,
                                         remainderOfLastMonth="",
-                                        lastWeekOffset,
                                         startOfNextMonth="",
                                         daysLength  = Date.getDaysInMonth($data.year,$data.month);
                                         
                                     //  Create a list of the Abbriviated month names
                                     for (n=0, l = Date.CultureInfo.abbreviatedMonthNames.length; n<l; n++) {
-                                        calMonths += '<a data-month="'+n+'">'+Date.CultureInfo.abbreviatedMonthNames[n]+'</a>';
+                                        calMonths += '<a data-month="'+n+'" class="dater-month">'+Date.CultureInfo.abbreviatedMonthNames[n]+'</a>';
                                     }
-                                    
-                                    //  Figure out what day it is
-                                    var getDayIndex = function(d){
-                                        var date = new Date();
-                                        var dayOfTheMonth = date.set({day: d, month: $data.month, year: $data.year });
-                                        return Date.getDayNumberFromName(dayOfTheMonth.toString('ddd'));
-                                    };
                                     
                                     //  Create a list of days of the week starting with Monday
                                     for (n = 0, l = Date.CultureInfo.firstLetterDayNames.length; n < l; n++) {
@@ -137,21 +128,21 @@
 
                                     //  Create all the days of the month
                                     for (x=0,l=daysLength; x<l; x++) {
-                                        if (x===0) {
-                                            firstWeekOffset = getDayIndex(x-1);
-                                        }
-                                        calDates += '<a data-day="'+getDayIndex(x+1)+'">'+(x+1)+'</a>';
+                                        calDates += '<a class="dater-item dater-day">'+(x+1)+'</a>';
                                     }
                                     
-                                    //  Fill the empty calendar spaces with the overflow to the next and previous months
+                                    //  Fill the empty calendar spaces with the overflow to the next and previous months                                    
+                                    var firstWeekOffset = Date.getDayNumberFromName(newdate.moveToFirstDayOfMonth().toString('ddd'));
+                                    //  First day of the week is monday.                                    
+                                        firstWeekOffset = (firstWeekOffset===0)?6:firstWeekOffset-1;
                                     newdate.add({month: -1});
                                     var days = newdate.getDaysInMonth();
-                                    var offset = newdate.getDaysInMonth() - firstWeekOffset ;
+                                    var offset = days - firstWeekOffset ;
                                     for (x=offset,l=days; x<l; x++) {
-                                        remainderOfLastMonth += '<i class="offset">'+(x+1)+'</i>';
+                                        remainderOfLastMonth += '<i class="offset dater-item">'+(x+1)+'</i>';
                                     }
                                     for (x=0,l=((Math.ceil((daysLength + firstWeekOffset) /7))*7)-(daysLength + firstWeekOffset); x<l; x++) {
-                                        startOfNextMonth += '<i class="offset">'+(x+1)+'</i>';
+                                        startOfNextMonth += '<i class="offset dater-item">'+(x+1)+'</i>';
                                     }
 
                                     //  Add the Year to the template
@@ -179,12 +170,12 @@
                                     show();
                                   },
                     show        = function(){
-                                    $('[data-day],[data-month]',$template).removeClass('active');
+                                    $('.dater-day,.dater-month',$template).removeClass('active');
                                     var d = Date.parseExact(checkDate,options.format);
                                     if(d.getFullYear() === $data.year && d.getMonth() === $data.month) {
                                         $('section a',$template).eq(parseInt($data.day,10)-1).addClass('active');
                                     }
-                                    $('[data-month]',$template).eq($data.month).addClass('active');
+                                    $('.dater-month',$template).eq($data.month).addClass('active');
                                     clearTimeout(timer); // Prevent the datepicker from detaching
                                   },
                     setPos      = function($instance){
@@ -216,14 +207,14 @@
                 });
                 
                 //  User clicks on a day and is done
-                $template.on('click','[data-day]',function(e){
+                $template.on('click','.dater-day',function(e){
                     $data.day = parseInt($(e.target).html(),10);
                     update($(e.target));
                     fadeOut();
                 });
                 
                 //  User clicks on a month and can continue
-                $template.on('click','[data-month]',function(e){
+                $template.on('click','.dater-month',function(e){
                     $data.month = $(this).data('month');
                     render($template);
                     $elem.focus();
