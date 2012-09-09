@@ -20,7 +20,11 @@ date.js (tested with Version: 1.0 Alpha-1)
 
 ### Options:
 Alternative date formats  
-`$("input").dater({format:"MM.dd.yy"});`   
+`$("input").dater({format:"MM.dd.yy"});`  
+ 
+First day of the week is either Monday or Sunday  
+`$("input").dater({firstDayIsMonday:false});`   
+*Default is true*
 
 Set or override the placeholder attribute  
 `$("input").dater({placeholder:"day-month-year"});` 

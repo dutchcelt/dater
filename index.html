@@ -8,18 +8,21 @@
         <script src="scripts/dater.js"></script>
         <script>
             $(document).ready(function(){
-                $("input").dater();
+                $("input:not(.iHateMondays)").dater();
+                $(".iHateMondays").dater({firstDayIsMonday: false});
             });
         </script>        
     </head>
     <body>
-        Label name <input type="text" id='test' />
+        Label name <input class="iHateMondays" type="text" id='test' />
         <br/>
         Label name <input type="text" placeholder="day-month-year" />
         <br/>
         Label name <input type="text" value="29-03-2014" />
         <br/>
         Label name <input type="text" value="tomorrow" />
+        <br/>
+        Label name <input class="iHateMondays" type="text" value="yesterday" />
         
     </body>
 </html>

@@ -1,7 +1,7 @@
 /*! ###########################################################################
     
     Source:     https://github.com/dutchcelt/dater
-    Version:    1.2
+    Version:    1.3
     
     Copyright (C) 2011 - 2012,  Lunatech Labs B.V., C. Egor Kloos. All rights reserved.
     GNU General Public License, version 3 (GPL-3.0)
@@ -36,7 +36,7 @@
     *   <input type="text" placeholder="day-month-year" />
     *   <input type="text" value="29-03-2014" />
     *   
-    *   Options:
+    *   $("input").dater({firstDayIsMonday:false}); // Set Monday or Sunday as the first day of the week.
     *   $("input").dater({format:"MM.dd.yy"}); // alternative date formats
     *   $("input").dater({placeholder:"day-month-year"}); // set or override the placeholder attribute
     *   $("input").dater({zIndex:"42"}); // set the CSS z-index property
@@ -71,7 +71,8 @@
                                     placeholder: "",
                                     startDateID: "",
                                     endDateID: "",
-                                    zIndex: "424242"
+                                    zIndex: "424242",
+                                    firstDayIsMonday: true
                                   },
                     options     = $.extend(defaults, settings),
                     $date       = (Date.parse($elem.val())===null) ? Date.today() : Date.parse($elem.val()),
@@ -79,7 +80,6 @@
                     checkDate   = $date.toString(options.format),
                     timer,
                     rendered    = false;
-
 
                     
                 //  FUNCTIONS
@@ -89,10 +89,6 @@
                                     $data.month = date.getMonth();
                                     $data.year  = date.getFullYear();
                                     if (typeof f === "function") { f(); }
-                                  },
-                    updateVal   = function(today){
-                                    var date = new Date($data.year,$data.month,$data.day);
-                                    return (today==="today") ? Date.today().toString(options.format) : date.toString(options.format);
                                   },
                     fadeOut     = function(){
                                     $template.fadeOut('fast',function(){
@@ -123,7 +119,7 @@
                                     
                                     //  Create a list of days of the week starting with Monday
                                     for (n = 0, l = Date.CultureInfo.firstLetterDayNames.length; n < l; n++) {
-                                        calDays += '<span>'+Date.CultureInfo.firstLetterDayNames[((n===6)?0:n+1)]+'</span>';
+                                        calDays += '<span>'+Date.CultureInfo.firstLetterDayNames[( (options.firstDayIsMonday) ? ( (n===6) ? 0 : n+1 ) : n )]+'</span>';
                                     }
 
                                     //  Create all the days of the month
@@ -133,12 +129,14 @@
                                     
                                     //  Fill the empty calendar spaces with the overflow to the next and previous months                                    
                                     var firstWeekOffset = Date.getDayNumberFromName(newdate.moveToFirstDayOfMonth().toString('ddd'));
-                                    //  First day of the week is monday.                                    
-                                        firstWeekOffset = (firstWeekOffset===0)?6:firstWeekOffset-1;
-                                    newdate.add({month: -1});
-                                    var days = newdate.getDaysInMonth();
-                                    var offset = days - firstWeekOffset ;
-                                    for (x=offset,l=days; x<l; x++) {
+                                    //  First day of the week is monday. 
+                                        if (options.firstDayIsMonday){                                   
+                                            firstWeekOffset = (firstWeekOffset===0)?6:firstWeekOffset-1;
+                                        }
+                                    var lastMonth = newdate.add({month: -1});
+                                    var numberOfDaysLastMonth = lastMonth.getDaysInMonth();
+                                    var offset = numberOfDaysLastMonth - firstWeekOffset ;
+                                    for (x=offset,l=numberOfDaysLastMonth; x<l; x++) {
                                         remainderOfLastMonth += '<i class="offset dater-item">'+(x+1)+'</i>';
                                     }
                                     for (x=0,l=((Math.ceil((daysLength + firstWeekOffset) /7))*7)-(daysLength + firstWeekOffset); x<l; x++) {
@@ -173,7 +171,7 @@
                                     $('.dater-day,.dater-month',$template).removeClass('active');
                                     var d = Date.parseExact(checkDate,options.format);
                                     if(d.getFullYear() === $data.year && d.getMonth() === $data.month) {
-                                        $('section a',$template).eq(parseInt($data.day,10)-1).addClass('active');
+                                        $('section a',$template).eq($data.day-1).addClass('active');
                                     }
                                     $('.dater-month',$template).eq($data.month).addClass('active');
                                     clearTimeout(timer); // Prevent the datepicker from detaching
@@ -192,7 +190,8 @@
                 
                 //  if by any chance a preset date doesn't have a numerical format then convert it.
                 if($elem.val()!==""){
-                    $elem.val($date.toString(options.format));
+                    var newdate = new Date().set($data);
+                    $elem.val(newdate.toString(options.format));
                 }
 
 
