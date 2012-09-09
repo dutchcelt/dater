@@ -127,7 +127,7 @@
                                         calDates += '<a class="dater-item dater-day">'+(x+1)+'</a>';
                                     }
                                     
-                                    //  Fill the empty calendar spaces with the overflow to the next and previous months                                    
+                                    //  Fill the empty calendar spaces with the date of the adjacent months                                    
                                     var firstWeekOffset = Date.getDayNumberFromName(newdate.moveToFirstDayOfMonth().toString('ddd'));
                                     //  First day of the week is monday. 
                                         if (options.firstDayIsMonday){                                   
@@ -169,11 +169,18 @@
                                   },
                     show        = function(){
                                     $('.dater-day,.dater-month',$template).removeClass('active');
-                                    var d = Date.parseExact(checkDate,options.format);
-                                    if(d.getFullYear() === $data.year && d.getMonth() === $data.month) {
+                                    var date = Date.parseExact(checkDate,options.format);
+                                    //  Highlight the date of today
+                                    if(Date.today().getFullYear() === $data.year && Date.today().getMonth() === $data.month) {
+                                        $('section a',$template).eq(Date.today().getDate()-1).addClass('today');
+                                    }
+                                    // Highlight the date set by the user or preset in the DOM
+                                    if(date.getFullYear() === $data.year && date.getMonth() === $data.month && $elem.val()!=="") {
                                         $('section a',$template).eq($data.day-1).addClass('active');
                                     }
-                                    $('.dater-month',$template).eq($data.month).addClass('active');
+                                    if ( $elem.val()!=="" ) {
+                                        $('.dater-month',$template).eq($data.month).addClass('active');
+                                    }
                                     clearTimeout(timer); // Prevent the datepicker from detaching
                                   },
                     setPos      = function($instance){
