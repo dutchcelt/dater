@@ -200,11 +200,10 @@
                                     var bottom = ($instance.outerHeight()+(offset.top + $elem.outerHeight()) > $('body').outerHeight() );
                                     $instance.css({position: 'absolute', zIndex: options.zIndex, top: offset.top + $elem.outerHeight(), left: offset.left });
                                   };
-                                  
-
+                                          
                 // Manipulate DOM loaded elements.                  
                 if (typeof $elem.attr("placeholder") !== 'string'){
-                    $elem.attr("placeholder",((options.placeholder==="") ? options.format.toLowerCase() : options.placeholder) );
+                    $elem.attr("placeholder", options.format.toLowerCase());
                 }
                 
                 //  if by any chance a preset date doesn't have a numerical format then convert it.
