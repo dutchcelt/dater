@@ -1,7 +1,7 @@
 /*! ###########################################################################
     
     Source:     https://github.com/dutchcelt/dater
-    Version:    1.3
+    Version:    1.4
     
     Copyright (C) 2011 - 2012,  Lunatech Labs B.V., C. Egor Kloos. All rights reserved.
     GNU General Public License, version 3 (GPL-3.0)
@@ -37,7 +37,8 @@
     *   <input type="text" value="29-03-2014" />
     *   
     *   $("input").dater({firstDayIsMonday:false}); // Set Monday or Sunday as the first day of the week.
-    *   $("input").dater({format:"MM.dd.yy"}); // alternative date formats
+    *   $("input").dater({format:"mm-dd-yyyy"}); // alternative date formats
+    *   $("input").dater({startDate:"mm-dd-yyyy", endDate: "mm-dd-yyyy"}); // Restict selection between Date ranges
     *   $("input").dater({placeholder:"day-month-year"}); // set or override the placeholder attribute
     *   $("input").dater({zIndex:"42"}); // set the CSS z-index property
     *   
@@ -68,8 +69,8 @@
                                   /* The base template for a single instance datepicker */
                     $template   = $('<div class="dater-widget" id="daterWidget'+index+'"><header><a class="dater-year-previous">&#9668;</a><span></span><a class="dater-year-next">&#9658;</a></header><aside></aside><section></section><footer><a class="dater-today">today</a></footer></div>'),
                     defaults    = { format: "dd-MM-yyyy",
-                                    placeholder: "",
-                                    startDateID: "",
+                                    placeholder: false,
+                                    startDateID: false,
                                     endDateID: "",
                                     zIndex: "424242",
                                     firstDayIsMonday: true
@@ -80,7 +81,6 @@
                     checkDate   = $date.toString(options.format),
                     timer,
                     rendered    = false;
-
                     
                 //  FUNCTIONS
                                   /* Return a date as a string */  
@@ -98,6 +98,13 @@
                                     if($elem.val()!=="" &&  Date.parse($elem.val())!==null) {
                                         checkDate = $elem.val();
                                     }
+                                  },
+                    checkRange  = function(day){
+                                    var newdate = new Date($data.year,$data.month,day);
+                                    var startDate = (Date.parse(options.startDate)===null) ? new Date(1970,1,1) : Date.parseExact(options.startDate,options.format);
+                                    var endDate = (Date.parse(options.endDate)===null) ? new Date(2070,1,1) : Date.parseExact(options.endDate,options.format);
+                                    return newdate.between(startDate,endDate);
+                                    
                                   },
                     render      = function($instance,f){
                                     
@@ -124,7 +131,12 @@
 
                                     //  Create all the days of the month
                                     for (x=0,l=daysLength; x<l; x++) {
-                                        calDates += '<a class="dater-item dater-day">'+(x+1)+'</a>';
+                                        if(checkRange(x+1)) {
+                                            calDates += '<a class="dater-item dater-day">'+(x+1)+'</a>';
+                                        } else {
+                                            calDates += '<i class="offset dater-item">'+(x+1)+'</i>';
+                                        }
+                                        
                                     }
                                     
                                     //  Fill the empty calendar spaces with the date of the adjacent months                                    

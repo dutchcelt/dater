@@ -8,21 +8,22 @@
         <script src="scripts/dater.js"></script>
         <script>
             $(document).ready(function(){
-                $("input:not(.iHateMondays)").dater();
+                $(".test1").dater({startDate:"03-09-2012"});
+                $(".test2").dater({startDate:"03-09-2012",endDate: "24-09-2012"});
                 $(".iHateMondays").dater({firstDayIsMonday: false});
             });
         </script>        
     </head>
     <body>
-        Label name <input class="iHateMondays" type="text" id='test' />
+        Week starts on Sunday <br/><input class="iHateMondays" type="text" id='test' />
         <br/>
-        Label name <input type="text" placeholder="day-month-year" />
+        Alternate placeholder &amp; restricted selection <br/><input class="test1" type="text" placeholder="day-month-year" />
         <br/>
-        Label name <input type="text" value="29-03-2014" />
+        Preset date <br/><input class="test1" type="text" value="29-03-2014" />
         <br/>
-        Label name <input type="text" value="tomorrow" />
+        Automatically convert entry 'tomorrow' &amp; restricted selection <br/><input class="test2" type="text" value="tomorrow" />
         <br/>
-        Label name <input class="iHateMondays" type="text" value="yesterday" />
+        Week starts on Sunday &amp; automatically convert entry 'yesterday' <br/><input class="iHateMondays" type="text" value="yesterday" />
         
     </body>
 </html>

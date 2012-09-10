@@ -26,6 +26,10 @@ First day of the week is either Monday or Sunday
 `$("input").dater({firstDayIsMonday:false});`   
 *Default is true*
 
+Restict selection between Date ranges
+`$("input").dater({startDate:"mm-dd-yyyy", endDate: "mm-dd-yyyy"});`
+*Note: start and end date are also within the set date range*
+
 Set or override the placeholder attribute  
 `$("input").dater({placeholder:"day-month-year"});` 
 
