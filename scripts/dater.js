@@ -69,9 +69,9 @@
                                   /* The base template for a single instance datepicker */
                     $template   = $('<div class="dater-widget" id="daterWidget'+index+'"><header><a class="dater-year-previous">&#9668;</a><span></span><a class="dater-year-next">&#9658;</a></header><aside></aside><section></section><footer><a class="dater-today">today</a></footer></div>'),
                     defaults    = { format: "dd-MM-yyyy",
-                                    placeholder: false,
-                                    startDateID: false,
-                                    endDateID: "",
+                                    placeholder:false,
+                                    startDate: false,
+                                    endDate: false,
                                     zIndex: "424242",
                                     firstDayIsMonday: true
                                   },
@@ -201,9 +201,13 @@
                                     $instance.css({position: 'absolute', zIndex: options.zIndex, top: offset.top + $elem.outerHeight(), left: offset.left });
                                   };
                                           
-                // Manipulate DOM loaded elements.                  
-                if (typeof $elem.attr("placeholder") !== 'string'){
+                // Manipulate DOM loaded elements.       
+                
+                // Set the placeholder attribute     
+                if (!options.placeholder && typeof $elem.attr("placeholder")!=="string"){
                     $elem.attr("placeholder", options.format.toLowerCase());
+                } else if (typeof options.placeholder ==="string"){
+                    $elem.attr("placeholder", options.placeholder);
                 }
                 
                 //  if by any chance a preset date doesn't have a numerical format then convert it.
