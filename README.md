@@ -34,6 +34,9 @@ Restict selection between Date ranges
 Set or override the placeholder attribute  
 `$("input").dater({placeholder:"day-month-year"});` 
 
+Set or override the text for the 'today' link.
+`$("input").dater({ todayString: "Now" });` 
+
 Set the CSS z-index property  
 `$("input").dater({zIndex:"42"});`
 

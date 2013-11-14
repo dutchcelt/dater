@@ -105,7 +105,7 @@
                     $( this.elem ).addClass("error").val("Error!");
                 }
                 this.setDate();
-
+                
                 /* Set the placeholder attribute*/
                 if (!this.options.placeholder && typeof $( this.elem ).attr("placeholder")!=="string"){
                     $( this.elem ).prop("placeholder", this.options.format);
@@ -179,7 +179,7 @@
             
                 //  Set language
                 moment.lang( this.options.lang );
-
+                
                 var renderDate = moment(this.newDate).isoWeekday( ( this.options.firstDayIsMonday ) ? 1 : 7 );
                     
                 var calMonths = "",
@@ -227,7 +227,7 @@
                 $('section', this.template).html(calDays + remainderOfLastMonth + calDates + startOfNextMonth);
                 //  Add the Months to the template
                 $('aside', this.template).html(calMonths);
-                
+                $( ".dater-today", this.template).html( ( this.options.todayString || moment().calendar().split(" ")[0] ) );
                 //  Add the template to the the body
                 this.highlighter();
                 $('body').append(this.template);
