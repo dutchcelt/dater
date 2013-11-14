@@ -133,12 +133,12 @@
             },
             fader: function () {
                 if( this.rendered ){
+                    this.rendered = false;
                     var that = this;
-                    that.template.fadeOut('fast', function () {
+                    that.template.fadeOut( 400 , function () {
                         that.template.detach();
                         $( that.elem ).trigger( "blur" );
                     });
-                    that.rendered = false;
                 }
             },
             setToToday: function () {
@@ -146,7 +146,6 @@
                 this.setDate(function(that){
                     that.elem.value = that.newDateString;
                     that.highlighter();
-                    that.fader();
                 });
             },
             highlighter: function () {
@@ -265,7 +264,7 @@
                 this.template.on('click', 'a.dater-day', function (event) {
                     dater.newDate.set( "date", $(event.target).data("dater-date") );
                     dater.update($(event.target));
-                    dater.fader();
+                    $( dater.elem ).trigger( "blur" );
                 });
                 this.template.on('mousedown', '.dater-item,.dater-days-of-the-week', function (event) {
                     event.preventDefault();
@@ -295,6 +294,7 @@
                /*  Input element is focus, show the datepicker */
                 $( this.elem ).on('focus', function (e) {
                     event.preventDefault();
+                    clearTimeout(dater.timer);
                     $( this ).removeClass("error")
                     if( ( $(this).val() !== dater.newDateString ) ){
                         dater.newDate = moment( $(this).val(), dater.options.format );
@@ -319,8 +319,10 @@
                 });
 
                 /*  Hide the datepicker */
-                $( this.elem ).on('blur.dater', function (event) {
-                    dater.fader();
+                $( this.elem ).on("blur", function (event) {
+                    if( dater.rendered ){
+                        dater.timer = setTimeout( dater.fader() , 100 ) ;
+                    }
                 });
             }
         };
