@@ -1,11 +1,11 @@
 /*! ###########################################################################
-    
+
     Source:     https://github.com/dutchcelt/dater
-    Version:    1.4
-    
-    Copyright (C) 2011 - 2012,  Lunatech Labs B.V., C. Egor Kloos. All rights reserved.
+    Version:    2
+
+    Copyright (C) 2011 - 2013,  Lunatech Labs B.V., C. Egor Kloos. All rights reserved.
     GNU General Public License, version 3 (GPL-3.0)
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -18,37 +18,38 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.opensource.org/licenses/gpl-3.0.html
-    
-    
+
+
     *   USAGE:
-    *   
+    *
     *   Requirements:
-    *   jQuery (tested with 1.8)
-    *   date.js (tested with Version: 1.0 Alpha-1)
-    *   
+    *   jQuery (tested with 2.0.3)
+    *   moment.js (tested with Version: 2.4.0)
+    *
     *   Script:
     *   $(document).ready(function(){
     *     $("input").dater();
     *   });
-    *   
+    *
     *   Markup:
     *   <input type="text" id='test' />
-    *   <input type="text" placeholder="day-month-year" />
     *   <input type="text" value="29-03-2014" />
-    *   
+    *
     *   $("input").dater({firstDayIsMonday:false}); // Set Monday or Sunday as the first day of the week.
     *   $("input").dater({format:"mm-dd-yyyy"}); // alternative date formats
     *   $("input").dater({startDate:"mm-dd-yyyy", endDate: "mm-dd-yyyy"}); // Restict selection between Date ranges
     *   $("input").dater({placeholder:"day-month-year"}); // set or override the placeholder attribute
     *   $("input").dater({zIndex:"42"}); // set the CSS z-index property
-    *   
-    *   
-    
+    *
+    *
+
     ########################################################################### */
 
 
     (function (factory) {
-    
+
+        "use strict";
+
         if (typeof define === 'function' && define.amd) {
             // AMD. Register as an anonymous module.
             define(['jquery'], factory);
@@ -56,254 +57,285 @@
             // Browser globals
             factory(jQuery);
         }
-        
+
     }(function ($) {
-    
+
+        "use strict";
+        
+        var daterMasterObject = {
+            elem: null,
+            defaults: {
+                lang: "en",
+                format: "DD-MM-YYYY",
+                placeholder: false,
+                startDate: "01-01-0001",
+                endDate: "01-01-9999",
+                zIndex: "42",
+                firstDayIsMonday: true
+            },
+            options: function (settings) {
+                if( settings.format ) {
+                    settings.format.toUpperCase();
+                }
+                return $.extend({}, this.defaults, settings);
+            },
+            index: -1,
+            templateStore: false,
+            template: function () {
+                return $('<div class="dater-widget"><header><a class="dater-year dater-year-previous">&#9668;</a><span class="dater-year-header"></span><a class="dater-year dater-year-next">&#9658;</a></header><aside></aside><section></section><footer><a class="dater-today">today</a></footer></div>')
+            },
+            timer: false,
+
+            day: moment().date(),
+            month: moment().month(),
+            year: moment().year(),
+            newDate : moment(),
+            newDateString: "",
+            
+            rendered: false,
+            initDater: function (elem, settings, index ) {
+            
+                this.elem = elem;
+                this.index = index;
+                this.options = this.options( settings );
+                this.template = this.template();
+                this.newDate = ( !this.elem.value ) ?  moment() : moment( this.elem.value, this.options.format );
+                if( !this.newDate.isValid() ){
+                    this.newDate = moment();
+                    $( this.elem ).addClass("error").val("Error!");
+                }
+                this.setDate();
+
+                /* Set the placeholder attribute*/
+                if (!this.options.placeholder && typeof $( this.elem ).attr("placeholder")!=="string"){
+                    $( this.elem ).prop("placeholder", this.options.format);
+                } else if (typeof this.options.placeholder === "string"){
+                    $( this.elem ).prop("placeholder", this.options.placeholder);
+                }
+
+                /*  Attach events */
+                this.events();
+            },
+            
+            checkDate: function () {
+                return this.newDateString;
+            },
+            setDate: function (f) {
+                if( this.newDate.isValid() ){
+                    this.day = this.newDate.date();
+                    this.month = this.newDate.month();
+                    this.year = this.newDate.year();
+                    this.newDateString = this.newDate.format( this.options.format );
+                }
+                if (typeof f === "function") {
+                    f(this);
+                }
+            },
+            fader: function () {
+                if( this.rendered ){
+                    var that = this;
+                    that.template.fadeOut('fast', function () {
+                        that.template.detach();
+                        $( that.elem ).trigger( "blur" );
+                    });
+                    that.rendered = false;
+                }
+            },
+            setToToday: function () {
+                this.newDate = moment();
+                this.setDate(function(that){
+                    that.elem.value = that.newDateString;
+                    that.highlighter();
+                    that.fader();
+                });
+            },
+            highlighter: function () {
+                $('.dater-day,.dater-month', this.template).removeClass('active');
+                $( ".today", this.template ).removeClass( "today" );
+                //  Highlight the date of today
+                if (moment().year() === this.newDate.year() && moment().month() === this.newDate.month()) {
+                    $('[data-dater-date]', this.template).eq(moment().date() -1 ).addClass('today');
+                }
+                // Highlight the date set by the user or preset in the DOM
+                if (this.newDate.year() === this.year && this.newDate.month() === this.month && this.elem.value !== "") {
+                    $('.dater-day', this.template).eq(this.day - 1).addClass('active');
+                }
+                if (this.newDate.year() === this.year) {
+                    $('.dater-month', this.template).eq(this.newDate.month()).addClass('active');
+                }
+            },
+            update: function( elem ) {
+                if ( elem ) {
+                    this.setDate();
+                    this.elem.value = this.newDateString;
+                }
+                this.highlighter();
+            },
+            setPos: function ($instance) {
+                var offset = $( this.elem ).offset();
+                var bottom = ($instance.outerHeight() + (offset.top + $( this.elem ).outerHeight()) > $('body').outerHeight() );
+                $instance.css({position: 'absolute', zIndex: this.options.zIndex, top: offset.top + $( this.elem ).outerHeight(), left: offset.left });
+            },
+            render: function (f) {
+            
+                //  Set language
+                moment.lang( this.options.lang );
+
+                var renderDate = moment(this.newDate).isoWeekday( ( this.options.firstDayIsMonday ) ? 1 : 7 );
+                    
+                var calMonths = "",
+                    calDays = "",
+                    calDates = "",
+                    remainderOfLastMonth = "",
+                    startOfNextMonth = "",
+                    daysLength = renderDate.daysInMonth();
+                
+                //  Create a list of the Abbriviated month names
+                for (var n = 0, l = 12; n < l; n++) {
+                    calMonths += '<a data-month="' + n + '" class="dater-month">' + moment.monthsShort()[n] + '</a>';
+                }
+                //  Create a list of days of the week starting with Monday
+                for (var n = 0, l = 7; n < l; n++) {
+                    calDays += '<span class="dater-days-of-the-week">' + moment.weekdaysMin()[( (renderDate.isoWeekday()===1) ? ( (n === 6) ? 0 : n + 1 ) : n )] + '</span>';
+                }
+
+                //  Create all the days of the month
+                for (var x = 0, l = daysLength; x < l; x++) {
+                    if ( this.checkRange(x + 1) ) {
+                        calDates += '<a class="dater-item dater-day" data-dater-date="' + ( x + 1 ) + '">' + ( x + 1 ) + '</a>';
+                    } else {
+                        calDates += '<i class="offset dater-day dater-item" data-dater-date="' + ( x + 1 ) + '">' + (x + 1) + '</i>';
+                    }
+                }
+                //  Fill the empty calendar spaces with the date of the adjacent months
+                var firstWeekOffset = renderDate.startOf("month").weekday();
+                var numberOfDaysLastMonth = renderDate.subtract("month",1).daysInMonth();
+                var offset = numberOfDaysLastMonth - firstWeekOffset;
+                if ( (numberOfDaysLastMonth - offset) < 7 ) {
+                    for (x = offset, l = numberOfDaysLastMonth; x < l; x++) {
+                        remainderOfLastMonth += '<i class="offset dater-item">' + x + '</i>';
+                    }
+                }
+                for (x = 0, l = ((Math.ceil((daysLength + firstWeekOffset) / 7)) * 7) - (daysLength + firstWeekOffset); x < l; x++) {
+                    startOfNextMonth += '<i class="offset dater-item">' + (x + 1) + '</i>';
+                }
+                if( this.templateStore ){
+                    this.template = this.templateStore;
+                }
+                //  Add the Year to the template
+                $('header span', this.template).html(this.newDate.year());
+                //  Add all the calendar days to the template
+                $('section', this.template).html(calDays + remainderOfLastMonth + calDates + startOfNextMonth);
+                //  Add the Months to the template
+                $('aside', this.template).html(calMonths);
+                
+                //  Add the template to the the body
+                this.highlighter();
+                $('body').append(this.template);
+                
+                
+                //  Hide the template
+                if (!this.rendered) {
+                    this.template.hide();
+                    this.setPos(this.template);
+                }
+
+                //  Callback
+                if (typeof f === "function") {
+                    f();
+                }
+            },
+            checkRange: function ( day ) {
+                var n = moment( [ this.newDate.year(), this.newDate.month(), day ] );
+                var opts = this.options;
+                var startDate = moment( opts.startDate, opts.format );
+                var endDate = moment( opts.endDate, opts.format );
+                return ( n.isAfter( startDate ) && n.isBefore( endDate ) );
+            },
+            events: function () {
+
+                var dater = this;
+                
+                /*  User clicks 'Today' and is done */
+                this.template.on('click', '.dater-today', function (event) {
+                    dater.setToToday();
+                });
+
+                /*  User clicks on a day and is done */
+                this.template.on('click', 'a.dater-day', function (event) {
+                    dater.newDate.set( "date", $(event.target).data("dater-date") );
+                    dater.update($(event.target));
+                    dater.fader();
+                });
+                this.template.on('mousedown', '.dater-item,.dater-days-of-the-week', function (event) {
+                    event.preventDefault();
+                });
+
+                /*  User clicks on a month and can continue */
+                this.template.on('mousedown', '.dater-month', function (event) {
+                    event.preventDefault();
+                    dater.newDate.set( "month", $(this).data('month') );
+                    dater.year = dater.newDate.year();
+                    dater.render();
+                    $( dater.elem ).trigger( "focus" );
+                });
+
+                /*  User sets year and can continue */
+                this.template.on('mousedown', '.dater-year', function ( event ) {
+                    event.preventDefault();
+                    if ($(this).is('.dater-year-next')) {
+                        dater.newDate.add( "y", 1 );
+                    } else {
+                        dater.newDate.subtract( "y", 1 );
+                    }
+                    dater.render();
+                    $( dater.elem ).trigger( "focus" );
+                });
+
+               /*  Input element is focus, show the datepicker */
+                $( this.elem ).on('focus', function (e) {
+                    event.preventDefault();
+                    $( this ).removeClass("error")
+                    if( ( $(this).val() !== dater.newDateString ) ){
+                        dater.newDate = moment( $(this).val(), dater.options.format );
+                        if( !dater.newDate.isValid() ){
+                            $(this).val("");
+                            dater.newDate = moment();
+                        } else {
+                            dater.update();
+                        }
+                    }
+                    $(this).trigger('render.dater');
+                });
+
+                /*  Render the detepicker */
+                $( this.elem ).on('render.dater', function (event) {
+                    if (dater.template.is(":visible") === false) {
+                        dater.render(function () {
+                            dater.template.fadeIn('fast');
+                            dater.rendered = true;
+                        });
+                    }
+                });
+
+                /*  Hide the datepicker */
+                $( this.elem ).on('blur.dater', function (event) {
+                    dater.fader();
+                });
+            }
+        };
+
         $.fn.dater = function(settings) {
             
-            return this.each(function(index,domElem) {
+            // Check for Moment.js!
+            if( typeof moment !== "function" ){ return false; }
+            
+            return this.each(function( index, domElem ) {
 
-                //  VARIABLES
-                
-                var $elem       = $(this),
-                                  /* The base template for a single instance datepicker */
-                    $template   = $('<div class="dater-widget" id="daterWidget'+index+'"><header><a class="dater-year-previous">&#9668;</a><span></span><a class="dater-year-next">&#9658;</a></header><aside></aside><section></section><footer><a class="dater-today">today</a></footer></div>'),
-                    defaults    = { format: "dd-MM-yyyy",
-                                    placeholder:false,
-                                    startDate: false,
-                                    endDate: false,
-                                    zIndex: "424242",
-                                    firstDayIsMonday: true
-                                  },
-                    options     = $.extend(defaults, settings),
-                    $date       = (Date.parse($elem.val())===null) ? Date.today() : Date.parse($elem.val()),
-                    $data       = $.data($elem,'dater',{day: $date.getDate(),month: $date.getMonth(), year: $date.getFullYear()}),
-                    checkDate   = $date.toString(options.format),
-                    timer,
-                    rendered    = false;
-                    
-                //  FUNCTIONS
-                                  /* Return a date as a string */  
-                var setData     = function(date,f){
-                                    $data.day   = date.getDate();
-                                    $data.month = date.getMonth();
-                                    $data.year  = date.getFullYear();
-                                    if (typeof f === "function") { f(); }
-                                  },
-                    fadeOut     = function(){
-                                    $template.fadeOut('fast',function(){
-                                        $(this).detach();
-                                    });
-                                    rendered = false;
-                                    if($elem.val()!=="" &&  Date.parse($elem.val())!==null) {
-                                        checkDate = $elem.val();
-                                    }
-                                  },
-                    checkRange  = function(day){
-                                    var newdate = new Date($data.year,$data.month,day);
-                                    var startDate = (Date.parse(options.startDate)===null) ? new Date(1970,1,1) : Date.parseExact(options.startDate,options.format);
-                                    var endDate = (Date.parse(options.endDate)===null) ? new Date(2070,1,1) : Date.parseExact(options.endDate,options.format);
-                                    return newdate.between(startDate,endDate);
-                                    
-                                  },
-                    render      = function($instance,f){
-                                    
-                                    var newdate = new Date($data.year,$data.month,$data.day);
+                var dater = Object.create( daterMasterObject );
+                    dater.initDater( domElem, settings, index );
 
-                                    //  Clear all other datepickers, except this one
-                                    $(".dater-widget:not('#daterWidget"+index+"')").detach();
-                                    var calMonths   = "",
-                                        calDays     = "",
-                                        calDates    = "",
-                                        remainderOfLastMonth="",
-                                        startOfNextMonth="",
-                                        daysLength  = Date.getDaysInMonth($data.year,$data.month);
-                                        
-                                    //  Create a list of the Abbriviated month names
-                                    for (n=0, l = Date.CultureInfo.abbreviatedMonthNames.length; n<l; n++) {
-                                        calMonths += '<a data-month="'+n+'" class="dater-month">'+Date.CultureInfo.abbreviatedMonthNames[n]+'</a>';
-                                    }
-                                    
-                                    //  Create a list of days of the week starting with Monday
-                                    for (n = 0, l = Date.CultureInfo.firstLetterDayNames.length; n < l; n++) {
-                                        calDays += '<span>'+Date.CultureInfo.firstLetterDayNames[( (options.firstDayIsMonday) ? ( (n===6) ? 0 : n+1 ) : n )]+'</span>';
-                                    }
-
-                                    //  Create all the days of the month
-                                    for (x=0,l=daysLength; x<l; x++) {
-                                        if(checkRange(x+1)) {
-                                            calDates += '<a class="dater-item dater-day">'+(x+1)+'</a>';
-                                        } else {
-                                            calDates += '<i class="offset dater-item">'+(x+1)+'</i>';
-                                        }
-                                        
-                                    }
-                                    
-                                    //  Fill the empty calendar spaces with the date of the adjacent months                                    
-                                    var firstWeekOffset = Date.getDayNumberFromName(newdate.moveToFirstDayOfMonth().toString('ddd'));
-                                    //  First day of the week is monday. 
-                                        if (options.firstDayIsMonday){                                   
-                                            firstWeekOffset = (firstWeekOffset===0)?6:firstWeekOffset-1;
-                                        }
-                                    var lastMonth = newdate.add({month: -1});
-                                    var numberOfDaysLastMonth = lastMonth.getDaysInMonth();
-                                    var offset = numberOfDaysLastMonth - firstWeekOffset ;
-                                    for (x=offset,l=numberOfDaysLastMonth; x<l; x++) {
-                                        remainderOfLastMonth += '<i class="offset dater-item">'+(x+1)+'</i>';
-                                    }
-                                    for (x=0,l=((Math.ceil((daysLength + firstWeekOffset) /7))*7)-(daysLength + firstWeekOffset); x<l; x++) {
-                                        startOfNextMonth += '<i class="offset dater-item">'+(x+1)+'</i>';
-                                    }
-
-                                    //  Add the Year to the template
-                                    $('header span',$instance).html($data.year);
-                                    //  Add all the calendar days to the template
-                                    $('section',$instance).html(calDays + remainderOfLastMonth + calDates + startOfNextMonth);
-                                    //  Add the Months to the template
-                                    $('aside',$instance).html(calMonths);
-                                    //  Add the template to the the body
-                                    $('body').append($instance);
-                                    //  Hide the template
-                                    if(!rendered){ 
-                                        $instance.hide(); 
-                                        setPos($instance);
-                                    }
-                                    show();
-                                    setPos($instance);
-                                    //  Callback
-                                    if (typeof f === "function") { f(); }
-                                  },
-                    update      = function(elem){
-                                    var date = new Date($data.year,$data.month,$data.day);
-                                    $elem.val(date.toString(options.format));
-                                    if (elem) { elem.addClass('active'); }
-                                    show();
-                                  },
-                    show        = function(){
-                                    $('.dater-day,.dater-month',$template).removeClass('active');
-                                    var date = Date.parseExact(checkDate,options.format);
-                                    //  Highlight the date of today
-                                    if(Date.today().getFullYear() === $data.year && Date.today().getMonth() === $data.month) {
-                                        $('section a',$template).eq(Date.today().getDate()-1).addClass('today');
-                                    }
-                                    // Highlight the date set by the user or preset in the DOM
-                                    if(date.getFullYear() === $data.year && date.getMonth() === $data.month && $elem.val()!=="") {
-                                        $('section a',$template).eq($data.day-1).addClass('active');
-                                    }
-                                    if ( $elem.val()!=="" ) {
-                                        $('.dater-month',$template).eq($data.month).addClass('active');
-                                    }
-                                    clearTimeout(timer); // Prevent the datepicker from detaching
-                                  },
-                    setPos      = function($instance){
-                                    var offset = $elem.offset();
-                                    var bottom = ($instance.outerHeight()+(offset.top + $elem.outerHeight()) > $('body').outerHeight() );
-                                    $instance.css({position: 'absolute', zIndex: options.zIndex, top: offset.top + $elem.outerHeight(), left: offset.left });
-                                  };
-                                          
-                // Manipulate DOM loaded elements.       
-                
-                // Set the placeholder attribute     
-                if (!options.placeholder && typeof $elem.attr("placeholder")!=="string"){
-                    $elem.attr("placeholder", options.format.toLowerCase());
-                } else if (typeof options.placeholder ==="string"){
-                    $elem.attr("placeholder", options.placeholder);
-                }
-                
-                //  if by any chance a preset date doesn't have a numerical format then convert it.
-                if($elem.val()!==""){
-                    var newdate = new Date().set($data);
-                    $elem.val(newdate.toString(options.format));
-                }
-
-
-                //  EVENTS
-
-                //  User clicks 'Today' and is done
-                $template.on('click','.dater-today',function(e){
-                    setData(Date.today());
-                    $elem.val(Date.today().toString(options.format));
-                    show();
-                    fadeOut();
-                });
-                
-                //  User clicks on a day and is done
-                $template.on('click','.dater-day',function(e){
-                    $data.day = parseInt($(e.target).html(),10);
-                    update($(e.target));
-                    fadeOut();
-                });
-                
-                //  User clicks on a month and can continue
-                $template.on('click','.dater-month',function(e){
-                    $data.month = $(this).data('month');
-                    render($template);
-                    $elem.focus();
-                });
-                
-                //  User sets year and can continue 
-                $template.on('click','header a',function(e){
-                    if($(this).is('.dater-year-next')){
-                        $data.year = $data.year + 1;
-                    } else {
-                        $data.year = $data.year - 1;
-                    }
-                    $('header span',$template).html($data.year);
-                    render($template);
-                    $elem.focus();
-                });
-                
-                //  Pointer device (re)enters the datepicker: Prevent detaching the datepicker
-                $template.on('click','.offset, span, header, footer, aside',function(e){
-                    clearTimeout(timer);
-                    $elem.focus();
-                });
-                
-                //  Input element is focus, show the datepicker
-                $elem.on('focus',function(e){
-                    var date = Date.parseExact($(this).val(),options.format);
-                    if(date===null && !rendered){
-                        setData(Date.today());
-                    }
-                    if(($(this).val()==="" || date!==null)){
-                        $(this).trigger('render.dater');
-                    }
-                    clearTimeout(timer);
-                });
-                
-                //  Render the detepicker
-                $elem.on('render.dater',function(e){
-                    if($("#daterWidget"+index).is(":visible")===false){
-                        render($template, function(){
-                            $template.fadeIn('fast');
-                            rendered = true;
-                        });
-                    }
-                });
-                
-                //  Set the input value
-                $elem.on('change',function(e){  
-                    var date = Date.parse($(this).val());
-                    if(date===null){
-                        $(this).val("");
-                        setData(Date.today());
-                    }
-                    if(date!==null){
-                        setData(date, function(){
-                            var newdate = new Date().set($data);
-                            $elem.val(newdate.toString(options.format));
-                            update();
-                            $elem.trigger('blur');
-                        });
-                    }
-                });
-                
-                //  Hide the datepicker
-                $elem.on('blur',function(e){
-                    timer=setTimeout(fadeOut, 200);
-                });
-                
             });
         };
-        
+
     }));
