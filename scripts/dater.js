@@ -52,7 +52,7 @@
 
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['jquery'], factory);
+        define(['jquery','moment'], factory);
     } else {
         // Browser globals
         factory(jQuery);
@@ -62,12 +62,11 @@
 
     "use strict";
 
-    $.fn.dater = function(settings) {
-
+    $.fn.dater = function( settings ) {
         // Check for Moment.js!
         if( typeof moment !== "function" ){
             console.error( "The moment.js instance is '"+ typeof moment +"'. Aborting plugin." );
-            console.info( "Moment.js 2.4.0 doesn't support async loading. :(" );
+            console.info( "Accessing Moment through the global scope is deprecated" );
             return this;
         }
 
@@ -187,10 +186,7 @@
             },
             render: function (f) {
 
-                //  Set language
-                moment.lang( this.options.lang );
-
-                var renderDate = moment(this.newDate).isoWeekday( ( this.options.firstDayIsMonday ) ? 1 : 7 );
+                var renderDate = moment(this.newDate).lang( this.options.lang ).isoWeekday( ( this.options.firstDayIsMonday ) ? 1 : 7 );
 
                 var calMonths = "",
                     calDays = "",
@@ -201,11 +197,12 @@
 
                 //  Create a list of the Abbriviated month names
                 for (var n = 0, l = 12; n < l; n++) {
-                    calMonths += '<a data-month="' + n + '" class="dater-month">' + moment.monthsShort()[n] + '</a>';
+                    calMonths += '<a data-month="' + n + '" class="dater-month">' + renderDate.lang().monthsShort(moment().month(n),'MMM') + '</a>';
                 }
                 //  Create a list of days of the week starting with Monday
                 for (var n = 0, l = 7; n < l; n++) {
-                    calDays += '<span class="dater-days-of-the-week">' + moment.weekdaysMin()[( (renderDate.isoWeekday()===1) ? ( (n === 6) ? 0 : n + 1 ) : n )] + '</span>';
+                    calDays += '<span class="dater-days-of-the-week">' +
+                        renderDate.lang().weekdaysMin( moment().day( ( (renderDate.isoWeekday()===1) ? ( (n === 6) ? 0 : n + 1 ) : n ) ),'dd') + '</span>';
                 }
 
                 //  Create all the days of the month
@@ -237,7 +234,7 @@
                 $('section', this.template).html(calDays + remainderOfLastMonth + calDates + startOfNextMonth);
                 //  Add the Months to the template
                 $('aside', this.template).html(calMonths);
-                $( ".dater-today", this.template).html( ( this.options.todayString || moment().calendar().split(" ")[0] ) );
+                $( ".dater-today", this.template).html( ( this.options.todayString || moment().lang(this.options.lang).calendar().split(" ")[0] ) );
                 //  Add the template to the the body
                 this.highlighter();
                 $('body').append(this.template);
@@ -337,7 +334,7 @@
             }
         };
 
-        return this.each(function( index, domElem ) {
+        return this.each( function( index, domElem ) {
 
             var dater = Object.create( daterMasterObject );
             dater.initDater( domElem, settings, index );
