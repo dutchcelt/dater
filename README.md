@@ -5,7 +5,7 @@ This is script in built on top of moment.js, a script to get and set dates.
 ## USAGE:
 
 ### Requirements:
-jQuery (tested with 2.0.4)
+jQuery (tested with 2.0.3)
 moment.js (tested with Version: 2.4.0)
 
 ### Markup:

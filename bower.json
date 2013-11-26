@@ -1,0 +1,29 @@
+{
+  "name": "Dater",
+  "version": "2.0.3",
+  "authors": [
+    "C. Egor Kloos"
+  ],
+  "description": "A date picker built on jQuery and Moment.js",
+  "main": "dater.js",
+  "keywords": [
+    "date",
+    "date",
+    "picker",
+    "jquery",
+    "momentjs",
+    "ui",
+    "dates",
+    "today"
+  ],
+  "license": "GPL-3",
+  "homepage": "https://github.com/dutchcelt/dater",
+  "private": false,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
