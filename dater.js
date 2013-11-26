@@ -1,7 +1,7 @@
 /*! ###########################################################################
 
  Source:     https://github.com/dutchcelt/dater
- Version:    2.0.2
+ Version:    2.0.4
 
  Copyright (C) 2011 - 2013,  Lunatech Labs B.V., C. Egor Kloos. All rights reserved.
  GNU General Public License, version 3 (GPL-3.0)

@@ -1,11 +1,15 @@
 {
   "name": "Dater",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "authors": [
     "C. Egor Kloos"
   ],
   "description": "A date picker built on jQuery and Moment.js",
-  "main": "dater.js",
+  "main": ["dater.js","styles/less/dater-base.less"],
+  "dependencies"   : {
+	"jquery"      : "~2.0.3",
+	"momentjs"    : "~2.4.0"
+  },
   "keywords": [
     "date",
     "date",
