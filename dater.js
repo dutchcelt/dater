@@ -25,9 +25,8 @@
  *   Requirements:
  *   ES5
  *   ES6 Promises
- *   ES6 Assign
- *   moment.js (tested with Version: 2.4.0)
- *   Assumes support for the console
+ *   ES6 Assign (added below)
+ *   moment.js (tested with Version: 2.10.3)
  *
  *   Script:
  *   $(document).ready(function(){
@@ -40,7 +39,7 @@
  *
  *   $("input").dater({firstDayIsMonday:false}); // Set Monday or Sunday as the first day of the week.
  *   $("input").dater({format:"mm-dd-yyyy"}); // alternative date formats
- *   $("input").dater({startDate:"mm-dd-yyyy", endDate: "mm-dd-yyyy"}); // Restict selection between Date ranges
+ *   $("input").dater({startDate:"mm-dd-yyyy", endDate: "mm-dd-yyyy"}); // Restrict selection between Date ranges
  *   $("input").dater({placeholder:"day-month-year"}); // set or override the placeholder attribute
  *   $("input").dater({zIndex:"42"}); // set the CSS z-index property
  *
@@ -72,10 +71,9 @@
 			//console.info( "Accessing Moment through the global scope is deprecated" );
 			return this;
 		}
-		return 	Array.prototype.slice.call(this).forEach( function( domElem, index ){
+		return Array.prototype.slice.call(this).forEach( function( domElem, index ){
 			var dater = Object.create( daterMasterObject );
 			dater.initDater( domElem, settings, index );
-
 		} );
 	};
 
@@ -121,15 +119,16 @@
 			this.newDate = ( !this.elem.value ) ? moment() : moment( this.elem.value, this.options.format );
 			if( !this.newDate.isValid() ){
 				this.newDate = moment();
-				$( this.elem ).addClass( "error" ).val( "Error!" );
+				this.elem.className += " error";
+				this.elem.value ="Error!";
 			}
 			this.setDate();
 
 			/* Set the placeholder attribute*/
-			if( !this.options.placeholder && typeof $( this.elem ).attr( "placeholder" ) !== "string" ){
-				$( this.elem ).prop( "placeholder", this.options.format );
+			if( !this.options.placeholder && typeof this.elem.getAttribute( "placeholder" ) !== "string" ){
+				this.elem.setAttribute( "placeholder", this.options.format );
 			} else if( typeof this.options.placeholder === "string" ){
-				$( this.elem ).prop( "placeholder", this.options.placeholder );
+				this.elem.setAttribute( "placeholder", this.options.placeholder );
 			}
 
 			/*  Attach events */
