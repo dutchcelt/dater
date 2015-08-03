@@ -1,6 +1,6 @@
 {
   "name": "Dater",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "This is script in built on top of moment.js, a script to get and set dates.",
   "main": "dater.js",
   "files": ["dater.js","styles/less/dater-base.less"],
